@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<!-- saved from url=(0061)file:///C:/Users/ASUS/Downloads/Taka%20calculator%20html.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taka Change Calculator</title>
+<link rel="stylesheet" href="./Taka Change Calculator_files/css2">
+<style>
+  :root {
+    --blush: #ffe3ec;
+    --petal: #ffc2d6;
+    --hot: #ff4f8b;
+    --berry: #5a1030;
+    --paper: #fff8fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--blush);
+    color: var(--berry);
+    font-family: "Fredoka", ui-rounded, system-ui, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px;
+    position: relative;
+    overflow-x: hidden;
+  }
+  main { width: 100%; max-width: 560px; position: relative; z-index: 1; }
+  h1 { font-size: 2rem; margin: 0 0 6px; font-weight: 600; }
+  .sub { margin: 0 0 24px; color: #8a3a5c; }
+  .calc {
+    background: var(--paper);
+    border: 3px solid var(--hot);
+    border-radius: 28px;
+    padding: 20px;
+    box-shadow: 0 8px 0 var(--hot);
+  }
+  .display {
+    background: var(--berry);
+    border-radius: 16px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .display span { color: var(--petal); font-size: 1.8rem; }
+  .display input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    color: #fff;
+    font: inherit;
+    font-size: 1.8rem;
+    text-align: right;
+  }
+  .display:focus-within { outline: 3px solid var(--petal); outline-offset: 2px; }
+  .display input::placeholder { color: #a8607f; }
+  button {
+    margin-top: 14px;
+    width: 100%;
+    padding: 14px;
+    font: inherit;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--hot);
+    border: 0;
+    border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #c93a6c;
+  }
+  button:active { transform: translateY(4px); box-shadow: 0 1px 0 #c93a6c; }
+  button:focus-visible { outline: 3px solid var(--berry); outline-offset: 3px; }
+  #msg { min-height: 1.4em; margin: 14px 0 0; text-align: center; }
+  #msg.error { color: #b0153f; font-weight: 500; }
+  #notes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .note {
+    background: var(--petal);
+    border: 2px dashed var(--berry);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .note b { font-size: 1.15rem; }
+  .note span { font-size: 1.6rem; font-weight: 600; }
+  #total { margin: 18px 0 0; text-align: center; font-weight: 500; }
+</style>
+</head>
+<body>
+
+  <main>
+    <h1>Taka Change Calculator</h1>
+    <p class="sub">Enter an amount and see the fewest notes and coins needed.</p>
+
+    <div class="calc">
+      <label class="display">
+        <span>৳</span>
+        <input id="amount" type="number" min="0" step="1" inputmode="numeric" placeholder="0" aria-label="Amount in Taka">
+      </label>
+      <button id="go" type="button">Break it down</button>
+      <p id="msg" role="status" aria-live="polite"></p>
+      <div id="notes"></div>
+      <p id="total"></p>
+    </div>
+  </main>
+
+<script>
+  // Same idea as the Java code: count = amount / note, then amount = amount % note.
+  const denominations = [1000, 500, 200, 100, 50, 20, 10, 5, 2, 1];
+
+  function breakDown() {
+    const input = document.getElementById("amount");
+    const msg = document.getElementById("msg");
+    const notesBox = document.getElementById("notes");
+    const total = document.getElementById("total");
+
+    notesBox.innerHTML = "";
+    total.textContent = "";
+    msg.className = "";
+
+    const original = Number(input.value);
+    if (input.value === "" || !Number.isInteger(original) || original < 0) {
+      msg.className = "error";
+      msg.textContent = "Enter a whole number of Taka, like 1375.";
+      return;
+    }
+
+    let remaining = original;
+    let totalPieces = 0;
+
+    for (const d of denominations) {
+      const count = Math.floor(remaining / d); // Java: remaining / d
+      remaining = remaining % d;               // Java: remaining % d
+      if (count > 0) {
+        totalPieces += count;
+        const tile = document.createElement("div");
+        tile.className = "note";
+        tile.innerHTML = "<b>৳" + d + "</b><span>×" + count + "</span>";
+        notesBox.appendChild(tile);
+      }
+    }
+
+    msg.textContent = original === 0 ? "Nothing to break down yet." : "";
+    if (original > 0) {
+      total.textContent = "৳" + original + " = " + totalPieces + (totalPieces === 1 ? " note or coin" : " notes and coins");
+    }
+  }
+
+  document.getElementById("go").addEventListener("click", breakDown);
+  document.getElementById("amount").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") breakDown();
+  });
+</script>
+
+</body></html>
